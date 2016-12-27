@@ -1,2 +1,2 @@
 # Robogames-TubePush
-Espaço de desenvolvimento para categoria TubePush da competição RoboGames 2017.
+Espaço de desenvolvimento para categoria Tube Push da competição RoboGames 2017.
