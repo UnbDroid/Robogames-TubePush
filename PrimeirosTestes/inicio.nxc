@@ -1,0 +1,145 @@
+/* Código alpha para robô do tube push! */
+#define RODA_ESQ OUT_C
+#define RODA_DIR OUT_A
+#define RODAS OUT_AC
+#define Claw OUT_B
+
+#define ClawSpeed 30
+#define ClawHold 10
+
+#define GYRO IN_4
+byte usesq = 255, usdir = 255; // guardam a leitura atualizada dos ultrassons
+int InchesToAngle(int inches){
+	return inches*DEGREES_PER_RADIAN/RAIO_RODAS;
+}
+
+float GetGyroOffset() { // FUNCIONANDO (chamar com os motores desligados)
+	float gyro_sum = 0, i;
+
+	for(i = 0; i < OFFSET_SAMPLES; ++i)
+	{
+		gyro_sum += SensorHTGyro(GYRO);
+	}
+
+	return gyro_sum/OFFSET_SAMPLES;
+}
+
+sub ChangeDirection(byte side) {
+	float degrees;
+	float angle = 0, gyro = 0;
+	unsigned long time = CurrentTick(), prev_time;
+
+	Off(RODAS);
+
+	float offset = GetGyroOffset();
+
+	SetSensorHTGyro(GYRO);
+	
+	if(side == DIREITA) {
+		degrees = 90;
+		OnFwd(RODA_ESQ, GYRO_POWER);
+		OnRev(RODA_DIR, GYRO_POWER);
+		while(angle < degrees) {
+			prev_time = time;
+			time = CurrentTick();
+			gyro = SensorHTGyro(GYRO);
+			angle += (gyro - offset) * (time - prev_time)/1000.0;
+			//ClearLine(LCD_LINE1);
+			//TextOut(0, LCD_LINE1, "ANGLE:");
+			//NumOut(48, LCD_LINE1, angle);
+		}
+	} else if(side == ESQUERDA) {
+		degrees = -90;
+		OnFwd(RODA_DIR, GYRO_POWER);
+		OnRev(RODA_ESQ, GYRO_POWER);
+		while(angle > degrees) {
+			prev_time = time;
+			time = CurrentTick();
+			gyro = SensorHTGyro(GYRO);
+			angle += (gyro - offset) * (time - prev_time)/1000.0;
+			//ClearLine(LCD_LINE1);
+			//TextOut(0, LCD_LINE1, "ANGLE:");
+			//NumOut(48, LCD_LINE1, angle);
+		}
+	} else if(side = TRAS) {
+		degrees = 180;
+		OnFwd(RODA_ESQ, GYRO_POWER);
+		OnRev(RODA_DIR, GYRO_POWER);
+		while(angle < degrees) {
+			prev_time = time;
+			time = CurrentTick();
+			gyro = SensorHTGyro(GYRO);
+			angle += (gyro - offset) * (time - prev_time)/1000.0;
+			//ClearLine(LCD_LINE1);
+			//TextOut(0, LCD_LINE1, "ANGLE:");
+			//NumOut(48, LCD_LINE1, angle);
+		}
+	}
+	Off(RODAS);
+}
+
+void UpdateUS() { // FUNCIONANDO
+	int tmp1 = SensorUS(port), i = 0;
+
+	while((tmp == 255 || tmp == 0 || abs(tmp - usdir) > 30) && i < 3)
+	{
+		tmp = (tmp + SensorUS(port))/2;
+		++i;
+	}
+	
+	usdir = 6*usdir/10 + 4*tmp/10;
+	//ClearLine(LCD_LINE7);
+	//TextOut(0, LCD_LINE7, "USDIR");
+	//NumOut(64, LCD_LINE7, usdir);
+	tmp1 = SensorUS(port2);				//qual porta?
+	i = 0;
+	while((tmp == 255 || tmp == 0 || abs(tmp - usesq) > 30) && i < 3)
+	{
+		tmp = (tmp + SensorUS(port2))/2;
+		++i;
+	}
+	
+	usesq = 6*usesq/10 + 4*tmp/10;
+	//ClearLine(LCD_LINE8);
+	//TextOut(0, LCD_LINE8, "USESQ");
+	//NumOut(64, LCD_LINE8, usesq);
+}
+
+void WalkFoward(int inches){
+	ResetMotorTachoCount(RODAS);
+	Off(RODAS);
+	int angle = InchesToAngle(inches);
+	long tachoesq_begin, tachoesq_speed;
+	unsigned long begin = CurrentTick(), lasttime;
+	
+	OnFwdReg(RODAS, RODA_POWER, OUT_REGMODE_SYNC);
+	
+	while(MotorTachoCount(RODA_DIR) < angle && (usesq < UsParam || usdir < UsParam)) {	
+	UpdateUS();
+	}
+	Off(RODAS);
+}
+void WalkBackwards(int inches){
+	ResetMotorTachoCount(RODAS);
+	Off(RODAS);
+	int angle = InchesToAngle(inches);
+	long tachoesq_begin, tachoesq_speed;
+	unsigned long begin = CurrentTick(), lasttime;
+	
+	OnRevReg(RODAS, RODA_POWER, OUT_REGMODE_SYNC);
+	
+	while(MotorTachoCount(RODA_DIR) > angle) {	
+
+	}
+	Off(RODAS);
+}
+
+void PullClaw(){
+	OnFwd(Claw, ClawSpeed);
+	Wait(1000);
+	OnFwd(Claw, ClawHold);
+}
+int main(){
+	
+	
+}
