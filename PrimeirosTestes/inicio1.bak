@@ -1,0 +1,31 @@
+#define ClawSpeed 30
+#define ClawHold 10
+
+/*definicoes de motores*/
+#define RODA_ESQ OUT_A
+#define RODA_DIR OUT_C
+#define RODAS OUT_AC
+#define Claw OUT_B
+
+/*definicoes de sensores*/
+#define USDIR IN_1
+#define USESQ IN_2
+#define LUZ IN_3
+#define GYRO IN_4
+
+#define MAXDIR 75
+#define MAXESQ 80
+
+byte usesq = 255, usdir = 255; // guardam a leitura atualizada dos ultrassons
+void Inicializasensores(){
+	SetSensorLight(LUZ);;
+    SetSensorLowspeed(USESQ);
+    SetSensorLowspeed(USDIR);
+}
+task main(){
+	Inicializasensores();
+	OnFwd(RODA_ESQ,MAXESQ);
+	OnFwd(RODA_DIR,MAXDIR);
+	while(SensorUS(USDIR)<30 || SensorUS(USESQ)<30);
+	Off(RODAS);
+}
