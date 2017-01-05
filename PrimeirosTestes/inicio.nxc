@@ -2,12 +2,26 @@
 #define RODA_ESQ OUT_C
 #define RODA_DIR OUT_A
 #define RODAS OUT_AC
-#define Claw OUT_B
+#define CLAW OUT_B
 
-#define ClawSpeed 30
-#define ClawHold 10
-
+#define USDIR IN_1
+#define USESQ IN_2
+#define COLOR IN_3
 #define GYRO IN_4
+
+#define RODA_POWER 60
+#define GYRO_POWER 50
+#define CLAWSPEED 30
+#define CLAWHOLD 10
+#define OFFSET_SAMPLES 3000
+
+#define RAIO_RODAS 1 		//EM POLEGADAS
+
+#define DIREITA 1
+#define ESQUERDA 0
+#define TRAS 2
+
+
 byte usesq = 255, usdir = 255; // guardam a leitura atualizada dos ultrassons
 int InchesToAngle(int inches){
 	return inches*DEGREES_PER_RADIAN/RAIO_RODAS;
@@ -79,11 +93,11 @@ sub ChangeDirection(byte side) {
 }
 
 void UpdateUS() { // FUNCIONANDO
-	int tmp1 = SensorUS(port), i = 0;
+	int tmp = SensorUS(USDIR), i = 0;
 
 	while((tmp == 255 || tmp == 0 || abs(tmp - usdir) > 30) && i < 3)
 	{
-		tmp = (tmp + SensorUS(port))/2;
+		tmp = (tmp + SensorUS(USDIR))/2;
 		++i;
 	}
 	
@@ -91,11 +105,11 @@ void UpdateUS() { // FUNCIONANDO
 	//ClearLine(LCD_LINE7);
 	//TextOut(0, LCD_LINE7, "USDIR");
 	//NumOut(64, LCD_LINE7, usdir);
-	tmp1 = SensorUS(port2);				//qual porta?
+	tmp = SensorUS(USESQ);				//qual porta?
 	i = 0;
 	while((tmp == 255 || tmp == 0 || abs(tmp - usesq) > 30) && i < 3)
 	{
-		tmp = (tmp + SensorUS(port2))/2;
+		tmp = (tmp + SensorUS(USDIR))/2;
 		++i;
 	}
 	
@@ -135,9 +149,9 @@ void WalkBackwards(int inches){
 }
 
 void PullClaw(){
-	OnFwd(Claw, ClawSpeed);
+	OnFwd(CLAW, CLAWSPEED);
 	Wait(1000);
-	OnFwd(Claw, ClawHold);
+	OnFwd(CLAW, CLAWHOLD);
 }
 int main(){
 	
