@@ -1,0 +1,15 @@
+#define LUZ IN_3
+
+void calib_luz() {
+     while(TRUE) {
+          ClearScreen();
+          NumOut(20, LCD_LINE3, Sensor(LUZ));
+          Wait(50);
+     }
+     
+}
+
+task main() {
+     SetSensorLight(LUZ);
+     calib_luz();
+}
