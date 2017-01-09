@@ -1,11 +1,14 @@
-#define ClawSpeed 30
-#define ClawHold 10
+#define CLAWGRAB 28  //velocidade para a garra apenas apertar os rolos
+#define CLAWSPEED 55  
+#define CLAWHOLD 20
+
+#define TEMPOERGUE 600
 
 /*definicoes de motores*/
 #define RODA_ESQ OUT_A
 #define RODA_DIR OUT_C
 #define RODAS OUT_AC
-#define Claw OUT_B
+#define CLAW OUT_B
 
 /*definicoes de sensores*/
 #define USDIR IN_1
@@ -13,14 +16,52 @@
 #define LUZ IN_3
 #define GYRO IN_4
 
+/*leitura do sensor de luz. Importante sempre atualizar*/
+#define LUZ_PRETO_MAX 45
+
 #define MAXDIR 75
 #define MAXESQ 80
 
 byte usesq = 255, usdir = 255; // guardam a leitura atualizada dos ultrassons
 void Inicializasensores(){
-	SetSensorLight(LUZ);;
+	  SetSensorLight(LUZ);;
     SetSensorLowspeed(USESQ);
     SetSensorLowspeed(USDIR);
+}
+
+void levanta() {
+     int aux;
+     OnRev(CLAW, CLAWGRAB);
+     aux=MotorRotationCount(CLAW);
+     Wait(100);
+     while((aux-MotorRotationCount(CLAW))>0){
+          aux=MotorRotationCount(CLAW);
+          Wait(100);
+          TextOut(20, LCD_LINE2, "passei");
+
+     }
+     Off(CLAW);
+     OnRev(CLAW, CLAWSPEED);
+     Wait(TEMPOERGUE);
+     OnRev(CLAW, CLAWHOLD);
+}
+
+void ganha(){
+     OnFwd(RODA_ESQ, MAXESQ);
+     OnFwd(RODA_DIR, MAXDIR);
+     Wait(2000);
+     Off(RODAS);
+}
+
+void levanta_e_ganha(){
+     levanta();
+     ganha();
+}
+
+void teste_final(){         //função chamada repetidamente para checar se o robo chegou na linha final, para entao erguer os bonecos e atravessar a linha
+     if(Sensor(LUZ)<LUZ_PRETO_MAX){
+          levanta_e_ganha();
+     }
 }
 task main(){
 	Inicializasensores();
