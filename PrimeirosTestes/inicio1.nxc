@@ -67,6 +67,6 @@ task main(){
 	Inicializasensores();
 	OnFwd(RODA_ESQ,MAXESQ);
 	OnFwd(RODA_DIR,MAXDIR);
-	while(SensorUS(USDIR)>30 && SensorUS(USESQ)>30);
+	while(SensorUS(USDIR)>15 && SensorUS(USESQ)>15);
 	Off(RODAS);
 }
