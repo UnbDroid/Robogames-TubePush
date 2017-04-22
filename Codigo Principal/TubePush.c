@@ -12,7 +12,7 @@
 #define US_PARAM 20
 #define WHEEL_POWER 45
 #define GYRO_POWER 40
-#define CLAW_SPEED 40
+#define CLAW_SPEED 30
 #define CLAW_HOLD 20
 #define OFFSET_SAMPLES 2000
 #define CLAW_GRAB 40
@@ -32,17 +32,34 @@
 
 
 byte leftUS = 255, rightUS = 255; // guardam a leitura atualizada dos ulBACKsons
+bool jafiz = false;
 int i_atual = 0;
 int j_atual = 0;
 int matrix[][] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
 bool alligned = true;
 byte botOrientation = WEST;
 int placesGone = 0;
+bool ClawOpen = true;
 void WalkForward(float inches);
 float InchesToAngle(float inches) {
 	return inches*DEGREES_PER_RADIAN/WHEEL_RADIUS;
 }
-
+void CloseClaw(){
+	if(ClawOpen == true){
+		OnRev(CLAW, CLAW_SPEED);
+		Wait(500);
+		Off(CLAW);
+		ClawOpen = false;
+	}
+}
+void OpenClaw(){
+	if(ClawOpen == false) {
+		OnFwd(CLAW, CLAW_SPEED);
+		Wait(500);
+		Off(CLAW);
+		ClawOpen = true;
+	}
+}
 float GetGyroOffset() { // FUNCIONANDO (chamar com os motores desligados)
 	float gyroSum = 0, i;
 
@@ -206,7 +223,7 @@ sub Allign(){
 
 	OnRev(WHEELS, SLOWSPEED);
 	Wait(1000);
-	WalkForward(4);
+	WalkForward(3.4);
 /*	do{
 		tc1 = MotorRotationCount(RIGHT_WHEEL) - countBeginDir;
 		tc2 = MotorRotationCount(LEFT_WHEEL) - countBeginEsq;
@@ -409,7 +426,7 @@ void PullClaw(){
 	OnRev(CLAW, CLAW_HOLD);
 }
 
-bool CanGoForward(){
+bool CanGoForward(int i, int j){
 /*	if(alligned == true){
 		if(SensorUS(FRONT_R_US) > ALLIGNED_US_PARAM || SensorUS(FRONT_L_US) > ALLIGNED_US_PARAM){
 			return true;
@@ -417,10 +434,21 @@ bool CanGoForward(){
 		else return false;
 	}*/
 //	else {
-		if(SensorUS(FRONT_R_US) > US_PARAM || SensorUS(FRONT_L_US) > US_PARAM){
+/*		if(i_atual == 0 && j_atual == 1){
+			CloseClaw();
+			Wait(50);
+	}
+		if(SensorUS(FRONT_R_US) > US_PARAM && SensorUS(FRONT_L_US) > US_PARAM){
+			OpenClaw();
+			return true;
+		}*/
+		if(i_atual == 0 && j_atual == 1 && i==0 && j == 2){
+			return false;
+		}
+		else {
+			//OpenClaw();
 			return true;
 		}
-		else return false;
 //	}
 }
 bool GoToMatrix(int i, int j){
@@ -442,8 +470,8 @@ bool GoToMatrix(int i, int j){
 			WalkForward(18);
 			while(true);
 		}
-		else if(CanGoForward() == true){
-			WalkForward(14.9);
+		else if(CanGoForward(i ,j) == true){
+			WalkForward(14.5);
 			placesGone++;
 			return true;
 		}
@@ -459,7 +487,8 @@ task main(){
 	int retornos = 0;
 	matrix[0][0] = 2;
 	bool flag = false;
-	Wait(2000);
+	jafiz = false;
+	Wait(1000);
 	WalkForward(4);
 	while(!(i_atual==2&&j_atual==2)){
 		for(int i = 0; i<3; i++){
